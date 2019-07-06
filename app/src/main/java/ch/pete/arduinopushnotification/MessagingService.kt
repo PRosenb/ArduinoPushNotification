@@ -11,6 +11,10 @@ import com.google.firebase.messaging.RemoteMessage
 import timber.log.Timber
 
 class MessagingService : FirebaseMessagingService() {
+    companion object {
+        const val PREF_INSTALLATION_ID = "installationId"
+    }
+
     override fun onCreate() {
         super.onCreate()
 

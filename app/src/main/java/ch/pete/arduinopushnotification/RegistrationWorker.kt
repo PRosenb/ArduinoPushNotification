@@ -4,6 +4,7 @@ import android.content.Context
 import android.preference.PreferenceManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import ch.pete.arduinopushnotification.MessagingService.Companion.PREF_INSTALLATION_ID
 import ch.pete.arduinopushnotification.api.LoggingInterceptor
 import ch.pete.arduinopushnotification.api.ServerApi
 import ch.pete.arduinopushnotification.api.data.DeleteRegistrationRequest
@@ -19,7 +20,6 @@ class RegistrationWorker(appContext: Context, workerParams: WorkerParameters) : 
     companion object {
         const val ARG_UPDATE_OR_DELETE = "updateOrDelete"
         const val ARG_TOKEN = "token"
-        private const val PREF_INSTALLATION_ID = "installationId"
         private const val API_BASE_URL = " https://5i8ur3ii0e.execute-api.us-east-2.amazonaws.com/prod/"
 
         enum class UpdateOrDelete {
