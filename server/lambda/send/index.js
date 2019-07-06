@@ -22,6 +22,22 @@ exports.handler = (event, context, callback) => {
         errorResponse("parameter installationId missing", callback);
         return;
     }
+    if (message == null || message == undefined) {
+        if (event.queryStringParameters != null) {
+            if (event.queryStringParameters.title != null || event.queryStringParameters.body != null) {
+                message = {
+                    notification: {
+                        title: event.queryStringParameters.title,
+                        body: event.queryStringParameters.body
+                    }
+                }
+            }
+        }
+    }
+    if (message == null || message == undefined) {
+        errorResponse("parameter message, title or body missing:" + event.queryStringParameters, callback);
+        return;
+    }
 
     var params = {
         TableName: 'ArduinoPushNotification',
@@ -153,8 +169,9 @@ function sendPushNotification(deviceToken, message, callback) {
         if (message.priority == undefined) {
             message.priority = "high";
         }
-
-        req.write(JSON.stringify(message));
+        const messageJson = JSON.stringify(message);
+        console.log("message: ", messageJson);
+        req.write(messageJson);
         req.end();
     });
 }
