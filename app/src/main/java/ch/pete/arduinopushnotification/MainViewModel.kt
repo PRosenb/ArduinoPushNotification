@@ -12,11 +12,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val installationId: LiveData<String> = mutableInstallationId
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(getApplication())
-    private val preferencesChangeListener = { sharedPreferences: SharedPreferences, key: String ->
-        when (key) {
-            MessagingService.PREF_INSTALLATION_ID -> {
-                mutableInstallationId.value =
-                    prefs.getString(MessagingService.PREF_INSTALLATION_ID, null)
+    // is garbage collected when it's a lambda
+    @Suppress("ObjectLiteralToLambda")
+    private val preferencesChangeListener = object : SharedPreferences.OnSharedPreferenceChangeListener {
+        override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+            when (key) {
+                MessagingService.PREF_INSTALLATION_ID -> {
+                    mutableInstallationId.value =
+                        prefs.getString(MessagingService.PREF_INSTALLATION_ID, null)
+                }
             }
         }
     }
