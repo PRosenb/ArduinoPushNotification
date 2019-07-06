@@ -2,8 +2,7 @@ package ch.pete.arduinopushnotification
 
 import android.content.Context
 import android.preference.PreferenceManager
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import ch.pete.arduinopushnotification.MessagingService.Companion.PREF_INSTALLATION_ID
 import ch.pete.arduinopushnotification.api.LoggingInterceptor
 import ch.pete.arduinopushnotification.api.ServerApi
@@ -24,6 +23,25 @@ class RegistrationWorker(appContext: Context, workerParams: WorkerParameters) : 
 
         enum class UpdateOrDelete {
             CREATE_OR_UPDATE, DELETE
+        }
+
+        fun createOrUpdateToken(token: String?) {
+            if (token == null) {
+                Timber.e("token is null, ignore update")
+                return
+            }
+
+            val dataBuilder = Data.Builder()
+                .putString(
+                    RegistrationWorker.ARG_UPDATE_OR_DELETE,
+                    RegistrationWorker.Companion.UpdateOrDelete.CREATE_OR_UPDATE.name
+                )
+                .putString(RegistrationWorker.ARG_TOKEN, token)
+            val registrationWorkRequest =
+                OneTimeWorkRequestBuilder<RegistrationWorker>()
+                    .setInputData(dataBuilder.build())
+                    .build()
+            WorkManager.getInstance().enqueue(registrationWorkRequest)
         }
     }
 
