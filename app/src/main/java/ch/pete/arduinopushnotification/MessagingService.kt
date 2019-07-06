@@ -41,6 +41,10 @@ class MessagingService : FirebaseMessagingService() {
         Timber.d("sendToServer: $token")
 
         val dataBuilder = Data.Builder()
+            .putString(
+                RegistrationWorker.ARG_UPDATE_OR_DELETE,
+                RegistrationWorker.Companion.UpdateOrDelete.CREATE_OR_UPDATE.name
+            )
             .putString(RegistrationWorker.ARG_TOKEN, token)
         val registrationWorkRequest =
             OneTimeWorkRequestBuilder<RegistrationWorker>()
