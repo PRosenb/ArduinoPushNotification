@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Arduino Push Notification</string>
+    <string name="default_channel_name">Default Channel</string>
 </resources>
