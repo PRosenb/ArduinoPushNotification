@@ -2,6 +2,9 @@ package ch.pete.arduinopushnotification
 
 import android.util.Log
 import android.widget.Toast
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -40,5 +43,13 @@ class MessagingService : FirebaseMessagingService() {
 
     private fun sendToServer(token: String?) {
         Log.d(TAG, "sendToServer: $token")
+
+        val dataBuilder = Data.Builder()
+            .putString(RegistrationWorker.ARG_TOKEN, token)
+        val registrationWorkRequest =
+            OneTimeWorkRequestBuilder<RegistrationWorker>()
+                .setInputData(dataBuilder.build())
+                .build()
+        WorkManager.getInstance().enqueue(registrationWorkRequest)
     }
 }
