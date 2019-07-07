@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Arduino Push Notification</string>
     <string name="default_channel_name">Default Channel</string>
+    <string name="not_registered">Not Registered</string>
+    <string name="register">Register</string>
+    <string name="unregister">Unregister</string>
 </resources>

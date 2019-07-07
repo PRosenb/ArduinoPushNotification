@@ -2,11 +2,11 @@ package ch.pete.arduinopushnotification
 
 import android.content.Context
 import android.preference.PreferenceManager
+import androidx.lifecycle.LiveData
 import androidx.work.*
 import ch.pete.arduinopushnotification.MessagingService.Companion.PREF_INSTALLATION_ID
 import ch.pete.arduinopushnotification.api.LoggingInterceptor
 import ch.pete.arduinopushnotification.api.ServerApi
-import ch.pete.arduinopushnotification.api.data.DeleteRegistrationRequest
 import ch.pete.arduinopushnotification.api.data.NewRegistrationRequest
 import ch.pete.arduinopushnotification.api.data.UpdateRegistrationRequest
 import com.google.gson.GsonBuilder
@@ -25,15 +25,15 @@ class RegistrationWorker(appContext: Context, workerParams: WorkerParameters) : 
             CREATE_OR_UPDATE, DELETE
         }
 
-        fun createOrUpdateToken(token: String?) {
+        fun createOrUpdateToken(token: String?): LiveData<WorkInfo>? {
             if (token == null) {
                 Timber.e("token is null, ignore update")
-                return
+                return null
             }
 
             val dataBuilder = Data.Builder()
                 .putString(
-                    RegistrationWorker.ARG_UPDATE_OR_DELETE,
+                    ARG_UPDATE_OR_DELETE,
                     RegistrationWorker.Companion.UpdateOrDelete.CREATE_OR_UPDATE.name
                 )
                 .putString(RegistrationWorker.ARG_TOKEN, token)
@@ -42,6 +42,21 @@ class RegistrationWorker(appContext: Context, workerParams: WorkerParameters) : 
                     .setInputData(dataBuilder.build())
                     .build()
             WorkManager.getInstance().enqueue(registrationWorkRequest)
+            return WorkManager.getInstance().getWorkInfoByIdLiveData(registrationWorkRequest.id)
+        }
+
+        fun deleteRegistration(): LiveData<WorkInfo> {
+            val dataBuilder = Data.Builder()
+                .putString(
+                    ARG_UPDATE_OR_DELETE,
+                    RegistrationWorker.Companion.UpdateOrDelete.DELETE.name
+                )
+            val registrationWorkRequest =
+                OneTimeWorkRequestBuilder<RegistrationWorker>()
+                    .setInputData(dataBuilder.build())
+                    .build()
+            WorkManager.getInstance().enqueue(registrationWorkRequest)
+            return WorkManager.getInstance().getWorkInfoByIdLiveData(registrationWorkRequest.id)
         }
     }
 
@@ -121,7 +136,7 @@ class RegistrationWorker(appContext: Context, workerParams: WorkerParameters) : 
 
         val registrationResponse =
             serverApi
-                .deleteRegistration(DeleteRegistrationRequest(installationId))
+                .deleteRegistration(installationId)
                 .execute()
 
         return if (registrationResponse.isSuccessful) {

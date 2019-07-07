@@ -7,8 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import timber.log.Timber
@@ -17,21 +15,6 @@ class MessagingService : FirebaseMessagingService() {
     companion object {
         const val PREF_INSTALLATION_ID = "installationId"
         private const val CHANNEL_ID_DEFAULT = "default"
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-
-        FirebaseInstanceId.getInstance().instanceId
-            .addOnCompleteListener(OnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Timber.w("getInstanceId failed", task.exception)
-                    return@OnCompleteListener
-                }
-
-                val token = task.result?.token
-                sendToServer(token)
-            })
     }
 
     override fun onNewToken(token: String?) {

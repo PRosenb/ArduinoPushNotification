@@ -6,7 +6,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainView {
     private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -14,8 +14,25 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel.view = this
         viewModel.init()
 
         viewModel.installationId.observe(this, Observer { installationId.text = it })
+
+        action.setOnClickListener {
+            viewModel.onActionButtonClicked()
+        }
+    }
+
+    override fun updateActionButton(actionText: String) {
+        action.text = actionText
+    }
+
+    override fun enableActionButton() {
+        action.isEnabled = true
+    }
+
+    override fun disableActionButton() {
+        action.isEnabled = false
     }
 }
