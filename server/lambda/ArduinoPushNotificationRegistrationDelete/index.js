@@ -21,10 +21,12 @@ exports.handler = (event, context, callback) => {
             errorResponse("Delete failed", callback)
         }
         else {
-            console.log("Delete success:", JSON.stringify(data, null, 2));
+            console.log("Delete success:", JSON.stringify(data));
             callback(null, {
                 statusCode: 201,
-                body: JSON.stringify({ success: true }),
+                body: JSON.stringify({
+                    installationId: installationId
+                }),
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                 },
@@ -37,7 +39,7 @@ function errorResponse(errorMessage, callback) {
     callback(null, {
         statusCode: 500,
         body: JSON.stringify({
-            Error: errorMessage,
+            error: errorMessage,
         }),
         headers: {
             'Access-Control-Allow-Origin': '*',
