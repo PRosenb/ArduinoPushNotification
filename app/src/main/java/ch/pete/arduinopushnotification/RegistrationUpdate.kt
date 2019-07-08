@@ -32,11 +32,16 @@ class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
             // not registered, nothing to do
             return Result.success();
         }
+        val installationId = prefs.getString(PREF_INSTALLATION_ID, null)
+        if (installationId == null) {
+            prefs.edit().putBoolean(PREF_REGISTER, false).apply()
+            Timber.e("installationId not found, assume unregistered")
+            return Result.failure()
+        }
 
         val serverApi = createApi()
         val registrationToken = inputData.getString(ARG_TOKEN) ?: return Result.failure()
 
-        val installationId = prefs.getString(PREF_INSTALLATION_ID, null)
         val registrationResponse =
             serverApi
                 .updateRegistration(installationId, RegistrationRequest(registrationToken))
@@ -49,7 +54,7 @@ class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
                 Timber.d("updated installationId=${registrationResult.installationId}")
                 Result.success()
             } else {
-                Timber.e("error: ${registrationResult?.error}")
+                Timber.e("error: ${registrationResult?.error.toString()}")
                 Result.failure()
             }
         } else {
