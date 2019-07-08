@@ -1,8 +1,7 @@
 package ch.pete.arduinopushnotification.api
 
-import ch.pete.arduinopushnotification.api.data.NewRegistrationRequest
+import ch.pete.arduinopushnotification.api.data.RegistrationRequest
 import ch.pete.arduinopushnotification.api.data.RegistrationResult
-import ch.pete.arduinopushnotification.api.data.UpdateRegistrationRequest
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -11,10 +10,10 @@ import retrofit2.http.*
  */
 interface ServerApi {
     @POST("registration")
-    fun createRegistration(@Body newRegistrationRequest: NewRegistrationRequest): Call<RegistrationResult>
+    fun createRegistration(@Body registrationRequest: RegistrationRequest): Call<RegistrationResult>
 
-    @PUT("registration")
-    fun updateRegistration(@Body updateRegistrationRequest: UpdateRegistrationRequest): Call<RegistrationResult>
+    @PUT("registration/{installationId}")
+    fun updateRegistration(@Path("installationId") installationId: String, @Body registrationRequest: RegistrationRequest): Call<RegistrationResult>
 
     @DELETE("registration/{installationId}")
     fun deleteRegistration(@Path("installationId") installationId: String): Call<RegistrationResult>

@@ -4,7 +4,7 @@ import android.content.Context
 import android.preference.PreferenceManager
 import androidx.lifecycle.LiveData
 import androidx.work.*
-import ch.pete.arduinopushnotification.api.data.NewRegistrationRequest
+import ch.pete.arduinopushnotification.api.data.RegistrationRequest
 import timber.log.Timber
 
 class RegistrationCreate(appContext: Context, workerParams: WorkerParameters) :
@@ -39,7 +39,7 @@ class RegistrationCreate(appContext: Context, workerParams: WorkerParameters) :
         val registrationToken = inputData.getString(ARG_TOKEN) ?: return Result.failure()
 
         val registrationResponse = serverApi
-            .createRegistration(NewRegistrationRequest(registrationToken))
+            .createRegistration(RegistrationRequest(registrationToken))
             .execute()
 
         return if (registrationResponse.isSuccessful) {

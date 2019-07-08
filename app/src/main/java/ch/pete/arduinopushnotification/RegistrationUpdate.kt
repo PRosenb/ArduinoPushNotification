@@ -5,7 +5,7 @@ import android.content.Context
 import android.preference.PreferenceManager
 import androidx.lifecycle.LiveData
 import androidx.work.*
-import ch.pete.arduinopushnotification.api.data.UpdateRegistrationRequest
+import ch.pete.arduinopushnotification.api.data.RegistrationRequest
 import timber.log.Timber
 
 class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
@@ -39,7 +39,7 @@ class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
         val installationId = prefs.getString(PREF_INSTALLATION_ID, null)
         val registrationResponse =
             serverApi
-                .updateRegistration(UpdateRegistrationRequest(installationId, registrationToken))
+                .updateRegistration(installationId, RegistrationRequest(registrationToken))
                 .execute()
 
         return if (registrationResponse.isSuccessful) {
