@@ -20,13 +20,13 @@ class LoggingInterceptor : Interceptor {
         private val LOG_RESPONSE_HEADERS = false
 
         fun bodyToString(request: Request): String {
-            try {
+            return try {
                 val copy = request.newBuilder().build()
                 val buffer = Buffer()
-                copy.body()!!.writeTo(buffer)
-                return buffer.readUtf8()
+                copy.body()?.writeTo(buffer)
+                buffer.readUtf8()
             } catch (e: IOException) {
-                return "Could not convert body to string"
+                "Could not convert body to string"
             }
 
         }
@@ -46,15 +46,13 @@ class LoggingInterceptor : Interceptor {
             }
             requestLog.append(request.headers())
 
-            if (request.method().compareTo("post", ignoreCase = true) == 0) {
-                requestLog.append("\n")
-                requestLog.append(bodyToString(request))
-            }
+            requestLog.append("\n")
+            requestLog.append(bodyToString(request))
             Timber.d(requestLog.toString())
         }
         val response = chain.proceed(request)
         val t2 = System.currentTimeMillis()
-        val bodyString = response.body()!!.string()
+        val bodyString = response.body()?.string()
 
         if (LOG_RESPONSE) {
             val responseLog = StringBuilder()
@@ -73,7 +71,7 @@ class LoggingInterceptor : Interceptor {
         }
 
         return response.newBuilder()
-            .body(ResponseBody.create(response.body()!!.contentType(), bodyString))
+            .body(ResponseBody.create(response.body()?.contentType(), bodyString))
             .build()
     }
 }
