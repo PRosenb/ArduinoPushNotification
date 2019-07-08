@@ -64,7 +64,6 @@ function updateDb(installationId, deviceToken, callback) {
         else {
             var result = {
                 installationId: installationId,
-                deviceToken: deviceToken,
             };
             callback(null, {
                 statusCode: 201,
