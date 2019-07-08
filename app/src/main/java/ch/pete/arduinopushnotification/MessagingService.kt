@@ -9,17 +9,17 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import timber.log.Timber
 
 class MessagingService : FirebaseMessagingService() {
     companion object {
-        const val PREF_INSTALLATION_ID = "installationId"
         private const val CHANNEL_ID_DEFAULT = "default"
     }
 
     override fun onNewToken(token: String?) {
         super.onNewToken(token)
-        sendToServer(token)
+        if (token != null) {
+            RegistrationUpdate.enqueue(token)
+        }
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage?) {
@@ -46,10 +46,5 @@ class MessagingService : FirebaseMessagingService() {
             manager.createNotificationChannel(channel)
         }
         manager.notify(0, builder.build())
-    }
-
-    private fun sendToServer(token: String?) {
-        Timber.d("sendToServer: $token")
-        RegistrationWorker.createOrUpdateToken(token)
     }
 }

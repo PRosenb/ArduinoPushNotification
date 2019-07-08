@@ -23,7 +23,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesChangeListener = object : SharedPreferences.OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
             when (key) {
-                MessagingService.PREF_INSTALLATION_ID -> {
+                Registration.PREF_INSTALLATION_ID -> {
                     updateRegistration()
                 }
             }
@@ -36,7 +36,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun onActionButtonClicked() {
-        val installationId = prefs.getString(MessagingService.PREF_INSTALLATION_ID, null)
+        val installationId = prefs.getString(Registration.PREF_INSTALLATION_ID, null)
         if (installationId == null) {
             // not registered, register device
             registerDevice()
@@ -56,8 +56,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 val token = task.result?.token
-                val liveDataWorkInfo = RegistrationWorker.createOrUpdateToken(token)
-                if (liveDataWorkInfo != null) {
+                if (token != null) {
+                    val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
                     liveDataWorkInfo.observeForever { workInfo ->
                         if (workInfo.state.isFinished) {
                             if (workInfo.state == WorkInfo.State.SUCCEEDED) {
@@ -74,7 +74,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun unregisterDevice() {
         view?.disableActionButton()
-        val liveDataWorkInfo = RegistrationWorker.deleteRegistration()
+        val liveDataWorkInfo = RegistrationDelete.enqueue(getApplication())
         liveDataWorkInfo.observeForever { workInfo ->
             if (workInfo.state.isFinished) {
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
@@ -86,7 +86,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun updateRegistration() {
-        val installationId = prefs.getString(MessagingService.PREF_INSTALLATION_ID, null)
+        val installationId = prefs.getString(Registration.PREF_INSTALLATION_ID, null)
         if (installationId == null) {
             mutableInstallationId.value = getApplication<App>().getString(R.string.not_registered)
             view?.updateActionButton(getApplication<App>().getString(R.string.register))
