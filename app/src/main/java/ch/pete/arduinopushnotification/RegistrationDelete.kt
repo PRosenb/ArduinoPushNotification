@@ -10,7 +10,7 @@ import androidx.work.WorkerParameters
 import timber.log.Timber
 
 class RegistrationDelete(appContext: Context, workerParams: WorkerParameters) :
-    Registration(appContext, workerParams) {
+        Registration(appContext, workerParams) {
 
     companion object {
         fun enqueue(context: Context): LiveData<WorkInfo> {
@@ -18,7 +18,7 @@ class RegistrationDelete(appContext: Context, workerParams: WorkerParameters) :
             prefs.edit().putBoolean(PREF_REGISTER, false).apply()
 
             val registrationWorkRequest =
-                OneTimeWorkRequestBuilder<RegistrationDelete>().build()
+                    OneTimeWorkRequestBuilder<RegistrationDelete>().build()
             WorkManager.getInstance().enqueue(registrationWorkRequest)
             return WorkManager.getInstance().getWorkInfoByIdLiveData(registrationWorkRequest.id)
         }
@@ -29,12 +29,12 @@ class RegistrationDelete(appContext: Context, workerParams: WorkerParameters) :
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val installationId = prefs.getString(PREF_INSTALLATION_ID, null)
-            ?: return Result.failure()
+                ?: return Result.failure()
 
         val registrationResponse =
-            serverApi
-                .deleteRegistration(installationId)
-                .execute()
+                serverApi
+                        .deleteRegistration(installationId)
+                        .execute()
 
         return if (registrationResponse.isSuccessful) {
             val registrationResult = registrationResponse.body()

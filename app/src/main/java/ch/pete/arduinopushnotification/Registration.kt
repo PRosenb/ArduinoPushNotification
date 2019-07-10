@@ -11,7 +11,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 abstract class Registration(appContext: Context, workerParams: WorkerParameters) :
-    Worker(appContext, workerParams) {
+        Worker(appContext, workerParams) {
     companion object {
         private const val API_BASE_URL = " https://5i8ur3ii0e.execute-api.us-east-2.amazonaws.com/prod/"
 

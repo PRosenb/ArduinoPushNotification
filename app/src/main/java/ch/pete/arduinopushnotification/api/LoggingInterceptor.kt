@@ -71,7 +71,7 @@ class LoggingInterceptor : Interceptor {
         }
 
         return response.newBuilder()
-            .body(ResponseBody.create(response.body()?.contentType(), bodyString))
-            .build()
+                .body(ResponseBody.create(response.body()?.contentType(), bodyString))
+                .build()
     }
 }

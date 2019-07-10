@@ -8,7 +8,7 @@ import ch.pete.arduinopushnotification.api.data.RegistrationRequest
 import timber.log.Timber
 
 class RegistrationCreate(appContext: Context, workerParams: WorkerParameters) :
-    Registration(appContext, workerParams) {
+        Registration(appContext, workerParams) {
 
     companion object {
         private const val ARG_TOKEN = "token"
@@ -18,11 +18,11 @@ class RegistrationCreate(appContext: Context, workerParams: WorkerParameters) :
             prefs.edit().putBoolean(PREF_REGISTER, true).apply()
 
             val dataBuilder = Data.Builder()
-                .putString(ARG_TOKEN, token)
+                    .putString(ARG_TOKEN, token)
             val registrationWorkRequest =
-                OneTimeWorkRequestBuilder<RegistrationCreate>()
-                    .setInputData(dataBuilder.build())
-                    .build()
+                    OneTimeWorkRequestBuilder<RegistrationCreate>()
+                            .setInputData(dataBuilder.build())
+                            .build()
             WorkManager.getInstance().enqueue(registrationWorkRequest)
             return WorkManager.getInstance().getWorkInfoByIdLiveData(registrationWorkRequest.id)
         }
@@ -39,8 +39,8 @@ class RegistrationCreate(appContext: Context, workerParams: WorkerParameters) :
         val registrationToken = inputData.getString(ARG_TOKEN) ?: return Result.failure()
 
         val registrationResponse = serverApi
-            .createRegistration(RegistrationRequest(registrationToken))
-            .execute()
+                .createRegistration(RegistrationRequest(registrationToken))
+                .execute()
 
         return if (registrationResponse.isSuccessful) {
             val registrationResult = registrationResponse.body()

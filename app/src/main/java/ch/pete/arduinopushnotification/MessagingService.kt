@@ -28,7 +28,7 @@ class MessagingService : FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent =
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
         val builder = NotificationCompat.Builder(this, CHANNEL_ID_DEFAULT)
         builder.setSmallIcon(R.mipmap.ic_launcher)
         remoteMessage?.notification?.title?.let { builder.setContentTitle(it) }
@@ -39,9 +39,9 @@ class MessagingService : FirebaseMessagingService() {
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID_DEFAULT,
-                getString(R.string.default_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT
+                    CHANNEL_ID_DEFAULT,
+                    getString(R.string.default_channel_name),
+                    NotificationManager.IMPORTANCE_DEFAULT
             )
             manager.createNotificationChannel(channel)
         }

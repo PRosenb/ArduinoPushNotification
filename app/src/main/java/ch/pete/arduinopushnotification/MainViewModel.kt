@@ -49,27 +49,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun registerDevice() {
         view?.disableActionButton()
         FirebaseInstanceId.getInstance().instanceId
-            .addOnCompleteListener(OnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Timber.w("getInstanceId failed", task.exception)
-                    return@OnCompleteListener
-                }
-
-                val token = task.result?.token
-                if (token != null) {
-                    val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
-                    liveDataWorkInfo.observeForever { workInfo ->
-                        if (workInfo.state.isFinished) {
-                            if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                                view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
-                            }
-                            view?.enableActionButton()
-                        }
+                .addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Timber.w("getInstanceId failed", task.exception)
+                        return@OnCompleteListener
                     }
-                } else {
-                    view?.enableActionButton()
-                }
-            })
+
+                    val token = task.result?.token
+                    if (token != null) {
+                        val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
+                        liveDataWorkInfo.observeForever { workInfo ->
+                            if (workInfo.state.isFinished) {
+                                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                                    view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
+                                }
+                                view?.enableActionButton()
+                            }
+                        }
+                    } else {
+                        view?.enableActionButton()
+                    }
+                })
     }
 
     private fun unregisterDevice() {
