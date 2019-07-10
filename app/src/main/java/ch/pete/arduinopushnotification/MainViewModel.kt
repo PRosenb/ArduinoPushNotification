@@ -3,6 +3,7 @@ package ch.pete.arduinopushnotification
 import android.app.Application
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,9 +15,12 @@ import timber.log.Timber
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     val installationId: LiveData<String>
         get() = mutableInstallationId
+    val serverUrl: LiveData<String>
+        get() = mutableServerUrl
     var view: MainView? = null
 
     private val mutableInstallationId: MutableLiveData<String> = MutableLiveData()
+    private val mutableServerUrl: MutableLiveData<String> = MutableLiveData()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(getApplication())
     // is garbage collected when it's a lambda
     @Suppress("ObjectLiteralToLambda")
@@ -26,6 +30,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 Registration.PREF_INSTALLATION_ID -> {
                     updateRegistration()
                 }
+                Registration.PREF_SERVER_URL -> {
+                    updateServerUrl()
+                }
             }
         }
     }
@@ -33,6 +40,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun init() {
         prefs.registerOnSharedPreferenceChangeListener(preferencesChangeListener)
         updateRegistration()
+        updateServerUrl()
     }
 
     fun onActionButtonClicked() {
@@ -44,6 +52,33 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             // registered, so we unregiser the device
             unregisterDevice()
         }
+    }
+
+    fun onUrlFocusChanged(hasFocus: Boolean) {
+        if (hasFocus) {
+            view?.showUrlEdit()
+        } else {
+            view?.hideUrlEdit()
+        }
+    }
+
+    fun onServerUrlSaveClicked(url: String) {
+        prefs.edit().putString(Registration.PREF_SERVER_URL, url).apply()
+        view?.hideUrlEdit()
+    }
+
+    fun onServerUrlCancelClicked() {
+        view?.hideUrlEdit()
+        updateServerUrl()
+    }
+
+    fun onServerUrlResetClicked() {
+        prefs.edit().remove(Registration.PREF_SERVER_URL).apply()
+    }
+
+    override fun onCleared() {
+        prefs.unregisterOnSharedPreferenceChangeListener(preferencesChangeListener)
+        super.onCleared()
     }
 
     private fun registerDevice() {
@@ -62,6 +97,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             if (workInfo.state.isFinished) {
                                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
                                     view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
+                                } else if (workInfo.state == WorkInfo.State.FAILED) {
+                                    showErrorToast(workInfo)
                                 }
                                 view?.enableActionButton()
                             }
@@ -79,9 +116,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (workInfo.state.isFinished) {
                 if (workInfo.state == WorkInfo.State.SUCCEEDED) {
                     view?.updateActionButton(getApplication<App>().getString(R.string.register))
+                } else if (workInfo.state == WorkInfo.State.FAILED) {
+                    showErrorToast(workInfo)
                 }
                 view?.enableActionButton()
             }
+        }
+    }
+
+    private fun showErrorToast(workInfo: WorkInfo) {
+        val errorMessageResId = workInfo.outputData.getInt(Registration.ERROR_MESSAGE_RES_ID, -1)
+        if (errorMessageResId == -1) {
+            Toast.makeText(getApplication(), R.string.error_occurred, Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(getApplication(), errorMessageResId, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -96,8 +144,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    override fun onCleared() {
-        prefs.unregisterOnSharedPreferenceChangeListener(preferencesChangeListener)
-        super.onCleared()
+    private fun updateServerUrl() {
+        val serverUrlFromPrefs = prefs.getString(Registration.PREF_SERVER_URL, null)
+        if (serverUrlFromPrefs != null) {
+            view?.updateServerUrl(serverUrlFromPrefs)
+            view?.enableUrlReset()
+        } else {
+            view?.updateServerUrl(getApplication<App>().getString(R.string.default_server_url))
+            view?.disableUrlReset()
+        }
     }
 }

@@ -4,4 +4,14 @@
     <string name="not_registered">Not Registered</string>
     <string name="register">Register</string>
     <string name="unregister">Unregister</string>
+    <string name="registration">Registration</string>
+    <string name="installation_id">Installation Id:</string>
+    <string name="server">Server</string>
+    <string name="url">URL:</string>
+    <string name="edit">Edit</string>
+    <string name="server_url_save">Save</string>
+    <string name="server_url_cancel">Cancel</string>
+    <string name="server_url_reset">Reset</string>
+    <string name="wrong_host_error">Host not found. Please update server url.</string>
+    <string name="error_occurred">An error occurred, please try again.</string>
 </resources>

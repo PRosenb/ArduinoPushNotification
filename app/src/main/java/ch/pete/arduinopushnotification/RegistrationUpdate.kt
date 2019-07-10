@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.work.*
 import ch.pete.arduinopushnotification.api.data.RegistrationRequest
 import timber.log.Timber
+import java.net.UnknownHostException
 
 class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
         Registration(appContext, workerParams) {
@@ -42,24 +43,30 @@ class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
         val serverApi = createApi()
         val registrationToken = inputData.getString(ARG_TOKEN) ?: return Result.failure()
 
-        val registrationResponse =
-                serverApi
-                        .updateRegistration(installationId, RegistrationRequest(registrationToken))
-                        .execute()
+        try {
+            val registrationResponse =
+                    serverApi
+                            .updateRegistration(installationId, RegistrationRequest(registrationToken))
+                            .execute()
 
-        return if (registrationResponse.isSuccessful) {
-            val registrationResult = registrationResponse.body()
-            if (registrationResult?.installationId != null) {
-                prefs.edit().putString(PREF_INSTALLATION_ID, registrationResult.installationId).apply()
-                Timber.d("updated installationId=${registrationResult.installationId}")
-                Result.success()
+            return if (registrationResponse.isSuccessful) {
+                val registrationResult = registrationResponse.body()
+                if (registrationResult?.installationId != null) {
+                    prefs.edit().putString(PREF_INSTALLATION_ID, registrationResult.installationId).apply()
+                    Timber.d("updated installationId=${registrationResult.installationId}")
+                    Result.success()
+                } else {
+                    Timber.e("error: ${registrationResult?.error.toString()}")
+                    Result.failure()
+                }
             } else {
-                Timber.e("error: ${registrationResult?.error.toString()}")
-                Result.failure()
+                Timber.e("error: ${registrationResponse?.errorBody()}")
+                Result.retry()
             }
-        } else {
-            Timber.e("error: ${registrationResponse?.errorBody()}")
-            Result.retry()
+        } catch (e: UnknownHostException) {
+            return Result.failure(
+                    Data.Builder().putInt(ERROR_MESSAGE_RES_ID, R.string.wrong_host_error).build()
+            )
         }
     }
 }

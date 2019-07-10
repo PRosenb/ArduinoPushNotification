@@ -1,6 +1,7 @@
 package ch.pete.arduinopushnotification
 
 import android.content.Context
+import android.preference.PreferenceManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import ch.pete.arduinopushnotification.api.LoggingInterceptor
@@ -13,15 +14,24 @@ import retrofit2.converter.gson.GsonConverterFactory
 abstract class Registration(appContext: Context, workerParams: WorkerParameters) :
         Worker(appContext, workerParams) {
     companion object {
-        private const val API_BASE_URL = " https://5i8ur3ii0e.execute-api.us-east-2.amazonaws.com/prod/"
-
+        const val ERROR_MESSAGE_RES_ID = "errorMessageResId"
+        const val PREF_SERVER_URL = "serverUrl"
         const val PREF_REGISTER = "register"
         const val PREF_INSTALLATION_ID = "installationId"
     }
 
     protected fun createApi(): ServerApi {
         val builder = Retrofit.Builder()
-        builder.baseUrl(API_BASE_URL)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        var serverBaseUrl = prefs.getString(PREF_SERVER_URL, null)
+        if (serverBaseUrl == null) {
+            serverBaseUrl = applicationContext.getString(R.string.default_server_url)
+                    ?: "" // cannot happen
+        }
+        if (!serverBaseUrl.endsWith('/')) {
+            serverBaseUrl += "/"
+        }
+        builder.baseUrl(serverBaseUrl)
 
         val gson = GsonBuilder().create()
         builder.addConverterFactory(GsonConverterFactory.create(gson))

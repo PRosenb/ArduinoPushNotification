@@ -3,11 +3,9 @@ package ch.pete.arduinopushnotification
 import android.content.Context
 import android.preference.PreferenceManager
 import androidx.lifecycle.LiveData
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import androidx.work.WorkerParameters
+import androidx.work.*
 import timber.log.Timber
+import java.net.UnknownHostException
 
 class RegistrationDelete(appContext: Context, workerParams: WorkerParameters) :
         Registration(appContext, workerParams) {
@@ -31,24 +29,30 @@ class RegistrationDelete(appContext: Context, workerParams: WorkerParameters) :
         val installationId = prefs.getString(PREF_INSTALLATION_ID, null)
                 ?: return Result.failure()
 
-        val registrationResponse =
-                serverApi
-                        .deleteRegistration(installationId)
-                        .execute()
+        try {
+            val registrationResponse =
+                    serverApi
+                            .deleteRegistration(installationId)
+                            .execute()
 
-        return if (registrationResponse.isSuccessful) {
-            val registrationResult = registrationResponse.body()
-            if (registrationResult?.installationId != null) {
-                prefs.edit().remove(PREF_INSTALLATION_ID).apply()
-                Timber.d("deleted installationId=${registrationResult.installationId}")
-                Result.success()
+            return if (registrationResponse.isSuccessful) {
+                val registrationResult = registrationResponse.body()
+                if (registrationResult?.installationId != null) {
+                    prefs.edit().remove(PREF_INSTALLATION_ID).apply()
+                    Timber.d("deleted installationId=${registrationResult.installationId}")
+                    Result.success()
+                } else {
+                    Timber.e("error: ${registrationResult?.error}")
+                    Result.failure()
+                }
             } else {
-                Timber.e("error: ${registrationResult?.error}")
-                Result.failure()
+                Timber.e("error: ${registrationResponse?.errorBody()}")
+                Result.retry()
             }
-        } else {
-            Timber.e("error: ${registrationResponse?.errorBody()}")
-            Result.retry()
+        } catch (e: UnknownHostException) {
+            return Result.failure(
+                    Data.Builder().putInt(ERROR_MESSAGE_RES_ID, R.string.wrong_host_error).build()
+            )
         }
     }
 }
