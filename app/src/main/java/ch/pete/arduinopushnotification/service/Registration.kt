@@ -1,9 +1,11 @@
-package ch.pete.arduinopushnotification
+package ch.pete.arduinopushnotification.service
 
 import android.content.Context
 import android.preference.PreferenceManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import ch.pete.arduinopushnotification.BuildConfig
+import ch.pete.arduinopushnotification.R
 import ch.pete.arduinopushnotification.api.LoggingInterceptor
 import ch.pete.arduinopushnotification.api.ServerApi
 import com.google.gson.GsonBuilder

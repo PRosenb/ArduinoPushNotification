@@ -1,10 +1,12 @@
-package ch.pete.arduinopushnotification
+package ch.pete.arduinopushnotification.view
 
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import ch.pete.arduinopushnotification.R
+import ch.pete.arduinopushnotification.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), MainView {

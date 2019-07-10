@@ -1,4 +1,4 @@
-package ch.pete.arduinopushnotification
+package ch.pete.arduinopushnotification.viewmodel
 
 import android.app.Application
 import android.content.SharedPreferences
@@ -8,6 +8,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.work.WorkInfo
+import ch.pete.arduinopushnotification.App
+import ch.pete.arduinopushnotification.R
+import ch.pete.arduinopushnotification.service.Registration
+import ch.pete.arduinopushnotification.service.RegistrationCreate
+import ch.pete.arduinopushnotification.service.RegistrationDelete
+import ch.pete.arduinopushnotification.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import timber.log.Timber

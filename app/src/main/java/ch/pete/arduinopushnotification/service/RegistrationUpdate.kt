@@ -1,48 +1,63 @@
-package ch.pete.arduinopushnotification
+package ch.pete.arduinopushnotification.service
+
 
 import android.content.Context
 import android.preference.PreferenceManager
 import androidx.lifecycle.LiveData
 import androidx.work.*
+import ch.pete.arduinopushnotification.R
+import ch.pete.arduinopushnotification.api.data.RegistrationRequest
 import timber.log.Timber
 import java.net.UnknownHostException
 
-class RegistrationDelete(appContext: Context, workerParams: WorkerParameters) :
+class RegistrationUpdate(appContext: Context, workerParams: WorkerParameters) :
         Registration(appContext, workerParams) {
 
     companion object {
-        fun enqueue(context: Context): LiveData<WorkInfo> {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            prefs.edit().putBoolean(PREF_REGISTER, false).apply()
+        const val ARG_TOKEN = "token"
 
+        fun enqueue(token: String): LiveData<WorkInfo> {
+            val dataBuilder = Data.Builder()
+                    .putString(ARG_TOKEN, token)
             val registrationWorkRequest =
-                    OneTimeWorkRequestBuilder<RegistrationDelete>().build()
+                    OneTimeWorkRequestBuilder<RegistrationUpdate>()
+                            .setInputData(dataBuilder.build())
+                            .build()
             WorkManager.getInstance().enqueue(registrationWorkRequest)
             return WorkManager.getInstance().getWorkInfoByIdLiveData(registrationWorkRequest.id)
         }
     }
 
     override fun doWork(): Result {
-        val serverApi = createApi()
-
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        if (!prefs.getBoolean(PREF_REGISTER, false)) {
+            // not registered, nothing to do
+            return Result.success();
+        }
         val installationId = prefs.getString(PREF_INSTALLATION_ID, null)
-                ?: return Result.failure()
+        if (installationId == null) {
+            prefs.edit().putBoolean(PREF_REGISTER, false).apply()
+            Timber.e("installationId not found, assume unregistered")
+            return Result.failure()
+        }
+
+        val serverApi = createApi()
+        val registrationToken = inputData.getString(ARG_TOKEN) ?: return Result.failure()
 
         try {
             val registrationResponse =
                     serverApi
-                            .deleteRegistration(installationId)
+                            .updateRegistration(installationId, RegistrationRequest(registrationToken))
                             .execute()
 
             return if (registrationResponse.isSuccessful) {
                 val registrationResult = registrationResponse.body()
                 if (registrationResult?.installationId != null) {
-                    prefs.edit().remove(PREF_INSTALLATION_ID).apply()
-                    Timber.d("deleted installationId=${registrationResult.installationId}")
+                    prefs.edit().putString(PREF_INSTALLATION_ID, registrationResult.installationId).apply()
+                    Timber.d("updated installationId=${registrationResult.installationId}")
                     Result.success()
                 } else {
-                    Timber.e("error: ${registrationResult?.error}")
+                    Timber.e("error: ${registrationResult?.error.toString()}")
                     Result.failure()
                 }
             } else {

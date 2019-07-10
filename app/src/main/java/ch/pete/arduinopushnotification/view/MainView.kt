@@ -1,4 +1,4 @@
-package ch.pete.arduinopushnotification
+package ch.pete.arduinopushnotification.view
 
 interface MainView {
     fun updateActionButton(actionText: String)

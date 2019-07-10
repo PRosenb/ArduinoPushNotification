@@ -1,4 +1,4 @@
-package ch.pete.arduinopushnotification
+package ch.pete.arduinopushnotification.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import ch.pete.arduinopushnotification.R
+import ch.pete.arduinopushnotification.view.MainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
