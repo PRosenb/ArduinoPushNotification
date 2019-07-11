@@ -1,83 +1,81 @@
 const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB();
 
-exports.handler = (event, context, callback) => {
+exports.handler = async(event, context) => {
     var installationId = event.pathParameters.installationId;
-    const body = event.body;
+    if (installationId == null) {
+        return getErrorResponse("No argument installationId.");
+    }
+
     var deviceToken = null;
+    const body = event.body;
     if (body != null) {
         deviceToken = JSON.parse(body).deviceToken;
     }
     if (deviceToken == undefined || deviceToken == null) {
-        errorResponse("No argument registrationToken.", callback);
-        return;
+        return getErrorResponse("No argument deviceToken.");
     }
 
-    if (installationId == null) {
-         errorResponse("No argument installationId.", callback);
-         return;
-    }
-    queryByInstallationId(installationId, deviceToken, context, callback);
-};
-
-function queryByInstallationId(installationId, deviceToken, context, callback) {
-    var params = {
-        TableName: 'ArduinoPushNotification',
-        Key: {
-            'InstallationId': { S: installationId },
+    const result = await queryByInstallationId(installationId, deviceToken);
+    return {
+        statusCode: 201,
+        body: JSON.stringify(result),
+        headers: {
+            'Access-Control-Allow-Origin': '*',
         },
     };
-    ddb.getItem(params, function(err, result) {
-        if (err) {
-            console.log("DB read error", err);
-            errorResponse("DB read error", callback);
+};
+
+async function queryByInstallationId(installationId, deviceToken) {
+    try {
+        var params = {
+            TableName: 'ArduinoPushNotification',
+            Key: {
+                'InstallationId': { S: installationId },
+            },
+        };
+        const result = await ddb.getItem(params).promise();
+        const item = result.Item;
+        if (item != undefined && item != null) {
+            var deviceTokenFromDb = item["DeviceToken"].S;
+            console.log("deviceTokenFromDb: ", deviceTokenFromDb);
+            var installationId = item["InstallationId"].S;
+            console.log("installationId: ", installationId);
+            return updateDb(installationId, deviceToken);
         }
         else {
-            const item = result.Item;
-            if (item != undefined && item != null) {
-                var deviceTokenFromDb = item["DeviceToken"].S;
-                console.log("deviceTokenFromDb: ", deviceTokenFromDb);
-                var installationId = item["InstallationId"].S;
-                console.log("installationId: ", installationId);
-                updateDb(installationId, deviceToken, callback);
-            }
-            else {
-                errorResponse("Invalid installationId", callback);
-            }
+            return getErrorResponse("Invalid installationId");
         }
-    });
+    }
+    catch (err) {
+        console.log("DB read error", err);
+        return getErrorResponse("DB read error");
+    }
 }
 
-function updateDb(installationId, deviceToken, callback) {
-    var writeParams = {
-        TableName: 'ArduinoPushNotification',
-        Item: {
-            'InstallationId': { S: installationId },
-            'DeviceToken': { S: deviceToken },
-        }
-    };
-    ddb.putItem(writeParams, function(err, data) {
-        if (err) {
-            console.log("DB write error", err);
-            errorResponse("DB write error", callback);
-        }
-        else {
-            var result = {
-                installationId: installationId,
-            };
-            callback(null, {
-                statusCode: 201,
-                body: JSON.stringify(result),
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                },
-            });
-        }
-    });
+async function updateDb(installationId, deviceToken) {
+    try {
+        var writeParams = {
+            TableName: 'ArduinoPushNotification',
+            Item: {
+                'InstallationId': { S: installationId },
+                'DeviceToken': { S: deviceToken },
+            }
+        };
+        const data = await ddb.putItem(writeParams).promise();
+        var result = {
+            installationId: installationId,
+        };
+        return result;
+    }
+    catch (err) {
+        console.log("DB write error", err);
+        return getErrorResponse("DB write error");
+    }
 }
 
-function errorResponse(errorMessage, callback) {
-    callback(null, {
+function getErrorResponse(errorMessage) {
+    return {
         statusCode: 500,
         body: JSON.stringify({
             error: errorMessage,
@@ -85,5 +83,5 @@ function errorResponse(errorMessage, callback) {
         headers: {
             'Access-Control-Allow-Origin': '*',
         },
-    });
+    };
 }
