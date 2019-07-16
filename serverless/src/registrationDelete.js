@@ -2,12 +2,12 @@ const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB();
 
 exports.handler = async(event, context) => {
-    // return {
-    //     statusCode: 200,
-    //     body: JSON.stringify({
-    //         input: event,
-    //     }),
-    // };
+//     return {
+//         statusCode: 200,
+//         body: JSON.stringify({
+//             input: event,
+//         }),
+//     };
     try {
         var installationId = null;
         const pathParameters = event.pathParameters;

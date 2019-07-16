@@ -2,17 +2,6 @@ const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB();
 
 exports.handler = async(event, context) => {
-   return {
-     statusCode: 200,
-     body: JSON.stringify(
-       {
-         message: 'Post message!',
-         input: event,
-       },
-       null,
-       2
-     ),
-   };
     var deviceToken = null;
     const body = event.body;
     if (body != null) {

@@ -3,37 +3,44 @@ const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB();
 
 exports.handler = async(event, context) => {
-    var installationId = null;
-    var message = null;
-    const body = event.body;
-    if (body != null) {
-        const requestBody = JSON.parse(body);
-        installationId = requestBody.installationId;
-        message = requestBody.message;
-    }
-    // allow get parameter as well
-    if (installationId == undefined || installationId == null) {
-        if (event.queryStringParameters != null) {
-            installationId = event.queryStringParameters.installationId
+    try {
+        var installationId = null;
+        var message = null;
+        const body = event.body;
+        if (body != null) {
+            const requestBody = JSON.parse(body);
+            installationId = requestBody.installationId;
+            message = requestBody.message;
         }
-    }
-    if (installationId == undefined || installationId == null) {
-        return getErrorResponse("parameter installationId missing");
-    }
-    if (message == null || message == undefined) {
-        if (event.queryStringParameters != null) {
-            if (event.queryStringParameters.title != null || event.queryStringParameters.body != null) {
-                message = {
-                    notification: {
-                        title: event.queryStringParameters.title,
-                        body: event.queryStringParameters.body
+        // allow get parameter as well
+        const queryStringParameters = event.queryStringParameters;
+        if (installationId == undefined || installationId == null) {
+            if (queryStringParameters != null) {
+                installationId = queryStringParameters.installationId;
+            }
+        }
+        if (installationId == undefined || installationId == null) {
+            return getErrorResponse("parameter installationId missing");
+        }
+        if (message == null || message == undefined) {
+            if (queryStringParameters != null) {
+                if (queryStringParameters.title != null || queryStringParameters.body != null) {
+                    message = {
+                        notification: {
+                            title: queryStringParameters.title,
+                            body: queryStringParameters.body
+                        }
                     }
                 }
             }
         }
+        if (message == null || message == undefined) {
+            return getErrorResponse("parameter message, title or body missing: " + event.queryStringParameters);
+        }
     }
-    if (message == null || message == undefined) {
-        return getErrorResponse("parameter message, title or body missing: " + event.queryStringParameters);
+    catch (err) {
+        console.log("parse params error: ", err);
+        return getErrorResponse("parse params error");
     }
 
     try {
@@ -70,7 +77,7 @@ async function sendPushNotification(deviceToken, message) {
             path: "/fcm/send",
             method: 'POST',
             headers: {
-                'Authorization': process.env.authorization,
+                'Authorization': process.env.AUTHORIZATION,
                 'Content-Type': 'application/json'
             }
         };

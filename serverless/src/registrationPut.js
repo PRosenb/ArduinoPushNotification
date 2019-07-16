@@ -2,17 +2,6 @@ const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB();
 
 exports.handler = async(event, context) => {
-   return {
-     statusCode: 200,
-     body: JSON.stringify(
-       {
-         message: 'Put message!',
-         input: event,
-       },
-       null,
-       2
-     ),
-   };
     var installationId = event.pathParameters.installationId;
     if (installationId == null) {
         return getErrorResponse("No argument installationId.");
