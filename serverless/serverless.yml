@@ -56,8 +56,8 @@ resources:
   Resources:
     ArduinoPushNotification:
       Type: 'AWS::DynamoDB::Table'
-      #      DeletionPolicy: Retain
       Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
           - AttributeName: InstallationId
             AttributeType: S
@@ -81,4 +81,3 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
