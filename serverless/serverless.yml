@@ -82,24 +82,3 @@ resources:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
         TableName: ${self:provider.environment.DYNAMODB_TABLE}
-
-#    CloudFrontDistribution:
-#      Type: AWS::CloudFront::Distribution
-#      Properties:
-#        DistributionConfig:
-#          Comment: My first CloudFront Distribution
-#          DefaultCacheBehavior:
-#            TargetOriginId: MyFirstOrigin
-#            ViewerProtocolPolicy: 'http-and-https'
-#            DefaultTTL: 30
-#            ForwardedValues:
-#              QueryString: true
-#          Enabled: true
-#          Origins:
-#            - Id: MyFirstOrigin
-#              DomainName: hjx6i5lknd.execute-api.us-east-1.amazonaws.com/dev
-#              OriginPath: /dev
-#              CustomOriginConfig:
-#                HTTPPort: 80
-#                HTTPSPort: 443
-#                OriginProtocolPolicy: https-only

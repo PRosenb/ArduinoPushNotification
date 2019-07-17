@@ -29,7 +29,7 @@ exports.handler = async(event, context) => {
 async function queryByInstallationId(installationId, deviceToken) {
     try {
         var params = {
-            TableName: 'ArduinoPushNotification',
+            TableName: process.env.DYNAMODB_TABLE,
             Key: {
                 'InstallationId': { S: installationId },
             },
@@ -56,7 +56,7 @@ async function queryByInstallationId(installationId, deviceToken) {
 async function updateDb(installationId, deviceToken) {
     try {
         var writeParams = {
-            TableName: 'ArduinoPushNotification',
+            TableName: process.env.DYNAMODB_TABLE,
             Item: {
                 'InstallationId': { S: installationId },
                 'DeviceToken': { S: deviceToken },

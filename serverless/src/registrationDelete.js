@@ -19,7 +19,7 @@ exports.handler = async(event, context) => {
         }
 
         var params = {
-            TableName: 'ArduinoPushNotification',
+            TableName: process.env.DYNAMODB_TABLE,
             Key: {
                 'InstallationId': { S: installationId },
             },

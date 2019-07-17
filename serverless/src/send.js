@@ -77,7 +77,7 @@ async function sendPushNotification(deviceToken, message) {
             path: "/fcm/send",
             method: 'POST',
             headers: {
-                'Authorization': process.env.AUTHORIZATION,
+                'Authorization': process.env.FIREBASE_AUTHORIZATION,
                 'Content-Type': 'application/json'
             }
         };
