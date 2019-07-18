@@ -4,7 +4,7 @@ const ddb = new AWS.DynamoDB();
 exports.handler = async(event, context) => {
     var installationId = event.pathParameters.installationId;
     if (installationId == null) {
-        return getErrorResponse("No argument installationId.");
+        return getErrorResponse(400, "Missing installationId");
     }
 
     var deviceToken = null;
@@ -13,12 +13,12 @@ exports.handler = async(event, context) => {
         deviceToken = JSON.parse(body).deviceToken;
     }
     if (deviceToken == undefined || deviceToken == null) {
-        return getErrorResponse("No argument deviceToken.");
+        return getErrorResponse(400, "Missing deviceToken");
     }
 
     const result = await queryByInstallationId(installationId, deviceToken);
     return {
-        statusCode: 201,
+        statusCode: 200,
         body: JSON.stringify(result),
         headers: {
             'Access-Control-Allow-Origin': '*',
@@ -44,12 +44,12 @@ async function queryByInstallationId(installationId, deviceToken) {
             return updateDb(installationId, deviceToken);
         }
         else {
-            return getErrorResponse("Invalid installationId");
+            return getErrorResponse(404, "installationId not found");
         }
     }
     catch (err) {
         console.log("DB read error", err);
-        return getErrorResponse("DB read error");
+        return getErrorResponse(500, "DB read error");
     }
 }
 
@@ -70,13 +70,13 @@ async function updateDb(installationId, deviceToken) {
     }
     catch (err) {
         console.log("DB write error", err);
-        return getErrorResponse("DB write error");
+        return getErrorResponse(500, "DB write error");
     }
 }
 
-function getErrorResponse(errorMessage) {
+function getErrorResponse(errorCode, errorMessage) {
     return {
-        statusCode: 500,
+        statusCode: errorCode,
         body: JSON.stringify({
             error: errorMessage,
         }),

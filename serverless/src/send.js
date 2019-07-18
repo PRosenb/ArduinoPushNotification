@@ -20,7 +20,7 @@ exports.handler = async(event, context) => {
             }
         }
         if (installationId == undefined || installationId == null) {
-            return getErrorResponse("parameter installationId missing");
+            return getErrorResponse(400, "Missing installationId");
         }
         if (message == null || message == undefined) {
             if (queryStringParameters != null) {
@@ -35,12 +35,12 @@ exports.handler = async(event, context) => {
             }
         }
         if (message == null || message == undefined) {
-            return getErrorResponse("parameter message, title or body missing: " + event.queryStringParameters);
+            return getErrorResponse(400, "Missing message, title or body");
         }
     }
     catch (err) {
         console.log("parse params error: ", err);
-        return getErrorResponse("parse params error");
+        return getErrorResponse(400, "parameter parsing error");
     }
 
     try {
@@ -62,12 +62,12 @@ exports.handler = async(event, context) => {
             return await sendPushNotification(deviceToken, message);
         }
         else {
-            return getErrorResponse("unknown deviceToken");
+            return getErrorResponse(404, "deviceToken not found");
         }
     }
     catch (err) {
         console.log("DB read error", err);
-        return getErrorResponse("DB read error");
+        return getErrorResponse(500, "DB read error");
     }
 };
 
@@ -96,7 +96,7 @@ async function sendPushNotification(deviceToken, message) {
             console.log("message_id: ", parsedData.results[0].message_id);
             if (parsedData.success == 1) {
                 return {
-                    statusCode: 201,
+                    statusCode: 200,
                     body: JSON.stringify({
                         success: parsedData.success,
                         message_id: parsedData.results[0].message_id
@@ -111,16 +111,16 @@ async function sendPushNotification(deviceToken, message) {
                 if (error == null || error == undefined) {
                     error = "unknown error";
                 }
-                return getErrorResponse(error);
+                return getErrorResponse(500, error);
             }
         }
         else {
-            return getErrorResponse("unknown response");
+            return getErrorResponse(500, "Unknown response from FCM");
         }
     }
     catch (err) {
         console.log("send push notification error", err);
-        return getErrorResponse("send push notification error");
+        return getErrorResponse(500, "Send push notification error");
     }
 }
 
@@ -188,13 +188,13 @@ async function updateUsage(installationId) {
     }
     catch (err) {
         console.log("DB statistics write error", err);
-        return getErrorResponse("DB write error");
+        return getErrorResponse(500, "DB write error");
     }
 }
 
-function getErrorResponse(errorMessage) {
+function getErrorResponse(errorCode, errorMessage) {
     return {
-        statusCode: 500,
+        statusCode: errorCode,
         body: JSON.stringify({
             error: errorMessage,
         }),

@@ -8,7 +8,7 @@ exports.handler = async(event, context) => {
         deviceToken = JSON.parse(body).deviceToken;
     }
     if (deviceToken == undefined || deviceToken == null) {
-        return getErrorResponse("No argument deviceToken.");
+        return getErrorResponse(400, "Missing deviceToken");
     }
 
     const result = await queryByDeviceToken(deviceToken, context);
@@ -48,7 +48,7 @@ async function queryByDeviceToken(deviceToken, context) {
     }
     catch (err) {
         console.log("DB read error", err);
-        return getErrorResponse("DB read error");
+        return getErrorResponse(500, "DB read error");
     }
 }
 
@@ -68,13 +68,13 @@ async function updateDb(installationId, deviceToken) {
     }
     catch (err) {
         console.log("DB write error", err);
-        return getErrorResponse("DB write error");
+        return getErrorResponse(500, "DB write error");
     }
 }
 
-function getErrorResponse(errorMessage) {
+function getErrorResponse(errorCode, errorMessage) {
     return {
-        statusCode: 500,
+        statusCode: errorCode,
         body: JSON.stringify({
             error: errorMessage,
         }),

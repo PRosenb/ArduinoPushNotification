@@ -15,7 +15,7 @@ exports.handler = async(event, context) => {
             installationId = pathParameters.installationId;
         }
         if (installationId == null) {
-            return getErrorResponse("No argument installationId.");
+            return getErrorResponse(400, "Missing installationId");
         }
 
         var params = {
@@ -27,7 +27,7 @@ exports.handler = async(event, context) => {
         const data = await ddb.deleteItem(params).promise();
         console.log("Delete success:", JSON.stringify(data));
         return {
-            statusCode: 201,
+            statusCode: 200,
             body: JSON.stringify({
                 installationId: installationId
             }),
@@ -38,13 +38,13 @@ exports.handler = async(event, context) => {
     }
     catch (err) {
         console.error("Delete failed:", JSON.stringify(err));
-        return getErrorResponse("Delete failed: ", JSON.stringify(err));
+        return getErrorResponse(500, "Delete failed: ", JSON.stringify(err));
     }
 };
 
-function getErrorResponse(errorMessage) {
+function getErrorResponse(errorCode, errorMessage) {
     return {
-        statusCode: 500,
+        statusCode: errorCode,
         body: JSON.stringify({
             error: errorMessage,
         }),
