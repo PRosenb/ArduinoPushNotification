@@ -44,8 +44,14 @@ exports.handler = async(event, context) => {
     }
 
     try {
+        await updateUsage(installationId);
+    }
+    catch (err) {
+        console.log("update usgae error", err);
+    }
+    try {
         var params = {
-            TableName: 'ArduinoPushNotification',
+            TableName: process.env.DYNAMODB_TABLE,
             Key: {
                 'InstallationId': { S: installationId },
             },
@@ -145,6 +151,45 @@ function sendHttpRequest(options, body) {
             reject(err);
         }
     });
+}
+
+const MONTH_ABBREVIATIONS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+async function updateUsage(installationId) {
+    try {
+        const now = new Date();
+        const month = MONTH_ABBREVIATIONS[now.getMonth()];
+        const timestamp = now.toISOString();
+
+        var readParams = {
+            TableName: process.env.DYNAMODB_TABLE_USAGE,
+            Key: {
+                'InstallationId': { S: installationId },
+                'Month': { S: month },
+            },
+        };
+        const dbResult = await ddb.getItem(readParams).promise();
+        var usageCount = Number(1);
+        if (dbResult.Item !== undefined && dbResult.Item !== null) {
+            const previousCount = dbResult.Item["Count"].N;
+            usageCount += Number(previousCount);
+        }
+
+        var writeParams = {
+            TableName: process.env.DYNAMODB_TABLE_USAGE,
+            Item: {
+                'InstallationId': { S: installationId },
+                'Month': { S: month },
+                'UsageCount': { N: usageCount.toString() },
+                'LastUsage': { S: timestamp },
+            }
+        };
+        await ddb.putItem(writeParams).promise();
+    }
+    catch (err) {
+        console.log("DB statistics write error", err);
+        return getErrorResponse("DB write error");
+    }
 }
 
 function getErrorResponse(errorMessage) {

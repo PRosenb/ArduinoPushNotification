@@ -10,6 +10,7 @@ provider:
   environment:
     DYNAMODB_TABLE: ${self:service}
   #    FIREBASE_AUTHORIZATION: "key=<your legacy firebase cloud messaging server key>"
+    DYNAMODB_TABLE_USAGE: ${self:service}Usage
 
   iamRoleStatements:
     - Effect: Allow
@@ -22,6 +23,11 @@ provider:
       Action:
         - dynamodb:Query
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}/index/DeviceToken-index"
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_USAGE}"
 
 functions:
   registrationPost:
@@ -81,3 +87,20 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+    ArduinoPushNotificationUsers:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_USAGE}
+        AttributeDefinitions:
+          - AttributeName: InstallationId
+            AttributeType: S
+          - AttributeName: Month
+            AttributeType: S
+        KeySchema:
+          - AttributeName: InstallationId
+            KeyType: HASH
+          - AttributeName: Month
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
