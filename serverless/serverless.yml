@@ -4,8 +4,8 @@ provider:
   name: aws
   runtime: nodejs10.x
 
-  #  stage: dev
-  #  region: us-east-1
+  stage: v1
+  region: us-east-1
 
   environment:
     DYNAMODB_TABLE: ${self:service}
