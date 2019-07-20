@@ -1,7 +1,9 @@
 package ch.pete.arduinopushnotification.view
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import ch.pete.arduinopushnotification.R
@@ -24,6 +26,9 @@ class MainActivity : AppCompatActivity(), MainView {
         action.setOnClickListener {
             viewModel.onActionButtonClicked()
         }
+        share.setOnClickListener {
+            viewModel.onShareButtonClicked()
+        }
     }
 
     override fun updateActionButton(actionText: String) {
@@ -36,5 +41,20 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun disableActionButton() {
         action.isEnabled = false
+    }
+
+    override var shareVisible: Boolean = false
+        set(value) {
+            share.isVisible = value
+            field = value
+        }
+
+    override fun shareText(text: String) {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/plain"
+        }
+        startActivity(sendIntent)
     }
 }

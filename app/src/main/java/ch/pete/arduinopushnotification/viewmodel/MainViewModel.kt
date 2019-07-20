@@ -53,6 +53,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun onShareButtonClicked() {
+        val installationId = prefs.getString(Registration.PREF_INSTALLATION_ID, null)
+        installationId?.let { view?.shareText(it) }
+    }
+
     override fun onCleared() {
         prefs.unregisterOnSharedPreferenceChangeListener(preferencesChangeListener)
         super.onCleared()
@@ -61,29 +66,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun registerDevice() {
         view?.disableActionButton()
         FirebaseInstanceId.getInstance().instanceId
-            .addOnCompleteListener(OnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Timber.w("getInstanceId failed", task.exception)
-                    return@OnCompleteListener
-                }
-
-                val token = task.result?.token
-                if (token != null) {
-                    val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
-                    liveDataWorkInfo.observeForever { workInfo ->
-                        if (workInfo.state.isFinished) {
-                            if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                                view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
-                            } else if (workInfo.state == WorkInfo.State.FAILED) {
-                                showErrorToast(workInfo)
-                            }
-                            view?.enableActionButton()
-                        }
+                .addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Timber.w("getInstanceId failed", task.exception)
+                        return@OnCompleteListener
                     }
-                } else {
-                    view?.enableActionButton()
-                }
-            })
+
+                    val token = task.result?.token
+                    if (token != null) {
+                        val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
+                        liveDataWorkInfo.observeForever { workInfo ->
+                            if (workInfo.state.isFinished) {
+                                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                                    view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
+                                } else if (workInfo.state == WorkInfo.State.FAILED) {
+                                    showErrorToast(workInfo)
+                                }
+                                view?.enableActionButton()
+                            }
+                        }
+                    } else {
+                        view?.enableActionButton()
+                    }
+                })
     }
 
     private fun unregisterDevice() {
@@ -115,9 +120,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (installationId == null) {
             mutableInstallationId.value = getApplication<App>().getString(R.string.not_registered)
             view?.updateActionButton(getApplication<App>().getString(R.string.register))
+            view?.shareVisible = false
         } else {
             mutableInstallationId.value = installationId
             view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
+            view?.shareVisible = true
         }
     }
 }
