@@ -29,7 +29,7 @@ class MessagingService : FirebaseMessagingService() {
         val pendingIntent =
                 PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
         val builder = NotificationCompat.Builder(this, defaultChannelId)
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.drawable.ic_launcher)
         remoteMessage?.notification?.title?.let { builder.setContentTitle(it) }
         remoteMessage?.notification?.body?.let { builder.setContentText(it) }
         builder.setAutoCancel(true)
