@@ -1,7 +1,6 @@
 package ch.pete.arduinopushnotification.view
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -21,23 +20,9 @@ class MainActivity : AppCompatActivity(), MainView {
         viewModel.init()
 
         viewModel.installationId.observe(this, Observer { installationId.text = it })
-        viewModel.serverUrl.observe(this, Observer { serverUrl.setText(it) })
 
         action.setOnClickListener {
             viewModel.onActionButtonClicked()
-        }
-
-        serverUrl.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
-            viewModel.onUrlFocusChanged(hasFocus)
-        }
-        serverUrlSave.setOnClickListener {
-            viewModel.onServerUrlSaveClicked(serverUrl.text.toString())
-        }
-        serverUrlCancel.setOnClickListener {
-            viewModel.onServerUrlCancelClicked()
-        }
-        serverUrlReset.setOnClickListener {
-            viewModel.onServerUrlResetClicked()
         }
     }
 
@@ -51,28 +36,5 @@ class MainActivity : AppCompatActivity(), MainView {
 
     override fun disableActionButton() {
         action.isEnabled = false
-    }
-
-    override fun updateServerUrl(url: String) {
-        serverUrl.setText(url)
-    }
-
-    override fun showUrlEdit() {
-        serverUrlSave.visibility = View.VISIBLE
-        serverUrlCancel.visibility = View.VISIBLE
-    }
-
-    override fun hideUrlEdit() {
-        serverUrlSave.visibility = View.INVISIBLE
-        serverUrlCancel.visibility = View.INVISIBLE
-        serverUrl.clearFocus()
-    }
-
-    override fun enableUrlReset() {
-        serverUrlReset.isEnabled = true
-    }
-
-    override fun disableUrlReset() {
-        serverUrlReset.isEnabled = false
     }
 }

@@ -21,12 +21,9 @@ import timber.log.Timber
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     val installationId: LiveData<String>
         get() = mutableInstallationId
-    val serverUrl: LiveData<String>
-        get() = mutableServerUrl
     var view: MainView? = null
 
     private val mutableInstallationId: MutableLiveData<String> = MutableLiveData()
-    private val mutableServerUrl: MutableLiveData<String> = MutableLiveData()
     private val prefs = PreferenceManager.getDefaultSharedPreferences(getApplication())
     // is garbage collected when it's a lambda
     @Suppress("ObjectLiteralToLambda")
@@ -36,9 +33,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 Registration.PREF_INSTALLATION_ID -> {
                     updateRegistration()
                 }
-                Registration.PREF_SERVER_URL -> {
-                    updateServerUrl()
-                }
             }
         }
     }
@@ -46,7 +40,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun init() {
         prefs.registerOnSharedPreferenceChangeListener(preferencesChangeListener)
         updateRegistration()
-        updateServerUrl()
     }
 
     fun onActionButtonClicked() {
@@ -60,28 +53,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun onUrlFocusChanged(hasFocus: Boolean) {
-        if (hasFocus) {
-            view?.showUrlEdit()
-        } else {
-            view?.hideUrlEdit()
-        }
-    }
-
-    fun onServerUrlSaveClicked(url: String) {
-        prefs.edit().putString(Registration.PREF_SERVER_URL, url).apply()
-        view?.hideUrlEdit()
-    }
-
-    fun onServerUrlCancelClicked() {
-        view?.hideUrlEdit()
-        updateServerUrl()
-    }
-
-    fun onServerUrlResetClicked() {
-        prefs.edit().remove(Registration.PREF_SERVER_URL).apply()
-    }
-
     override fun onCleared() {
         prefs.unregisterOnSharedPreferenceChangeListener(preferencesChangeListener)
         super.onCleared()
@@ -90,29 +61,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun registerDevice() {
         view?.disableActionButton()
         FirebaseInstanceId.getInstance().instanceId
-                .addOnCompleteListener(OnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        Timber.w("getInstanceId failed", task.exception)
-                        return@OnCompleteListener
-                    }
+            .addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Timber.w("getInstanceId failed", task.exception)
+                    return@OnCompleteListener
+                }
 
-                    val token = task.result?.token
-                    if (token != null) {
-                        val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
-                        liveDataWorkInfo.observeForever { workInfo ->
-                            if (workInfo.state.isFinished) {
-                                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-                                    view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
-                                } else if (workInfo.state == WorkInfo.State.FAILED) {
-                                    showErrorToast(workInfo)
-                                }
-                                view?.enableActionButton()
+                val token = task.result?.token
+                if (token != null) {
+                    val liveDataWorkInfo = RegistrationCreate.enqueue(token, getApplication())
+                    liveDataWorkInfo.observeForever { workInfo ->
+                        if (workInfo.state.isFinished) {
+                            if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                                view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
+                            } else if (workInfo.state == WorkInfo.State.FAILED) {
+                                showErrorToast(workInfo)
                             }
+                            view?.enableActionButton()
                         }
-                    } else {
-                        view?.enableActionButton()
                     }
-                })
+                } else {
+                    view?.enableActionButton()
+                }
+            })
     }
 
     private fun unregisterDevice() {
@@ -147,17 +118,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             mutableInstallationId.value = installationId
             view?.updateActionButton(getApplication<App>().getString(R.string.unregister))
-        }
-    }
-
-    private fun updateServerUrl() {
-        val serverUrlFromPrefs = prefs.getString(Registration.PREF_SERVER_URL, null)
-        if (serverUrlFromPrefs != null) {
-            view?.updateServerUrl(serverUrlFromPrefs)
-            view?.enableUrlReset()
-        } else {
-            view?.updateServerUrl(getApplication<App>().getString(R.string.default_server_url))
-            view?.disableUrlReset()
         }
     }
 }
