@@ -8,8 +8,8 @@ provider:
   region: us-east-1
 
   environment:
+    #    FIREBASE_AUTHORIZATION: "key=<your legacy firebase cloud messaging server key>"
     DYNAMODB_TABLE: ${self:service}
-  #    FIREBASE_AUTHORIZATION: "key=<your legacy firebase cloud messaging server key>"
     DYNAMODB_TABLE_USAGE: ${self:service}Usage
 
   iamRoleStatements:

@@ -16,7 +16,7 @@ It shows how to set up `AWS` with the `Serverless` framework, contains a small `
 - Good starting point for similar projects
 
 ## Components
-- [Serverless configuration](serverless/serverless.yml)
+- [Serverless configuration](serverless/serverless.yaml)
 - [Lambda functions](serverless/src/)
 - [Android App](app)
 - [Arduino Sample](ArduinoPushNotificationClient/src/main.cpp)
