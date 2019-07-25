@@ -19,7 +19,7 @@ It shows how to set up `AWS` with the `Serverless` framework, contains a small `
 - [Serverless configuration](serverless/serverless.yaml)
 - [Lambda functions](serverless/src/)
 - [Android App](app)
-- [Arduino Sample](ArduinoPushNotificationClient/src/main.cpp)
+- [Arduino Samples](ArduinoSimpleSender/ArduinoSimpleSender/ArduinoSimpleSender.ino)
 
 ## Setup Instructions
 
